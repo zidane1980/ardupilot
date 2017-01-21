@@ -11,6 +11,7 @@
 
 #define AC_PID_FILT_HZ_DEFAULT  20.0f   // default input filter frequency
 #define AC_PID_FILT_HZ_MIN      0.01f   // minimum input filter frequency
+#define AC_PID_NOTCH_HZ_DEFAULT  0.0f   // default notch input filter frequency
 
 /// @class	AC_PID
 /// @brief	Copter PID control class
@@ -89,6 +90,7 @@ protected:
     AP_Float        _kd;
     AP_Float        _imax;
     AP_Float        _filt_hz;                   // PID Input filter frequency in Hz
+    AP_Float        _notch_hz;                   // PID Input notch filter frequency in Hz
 
     // flags
     struct ac_pid_flags {
@@ -98,7 +100,15 @@ protected:
     // internal variables
     float           _dt;                    // timestep in seconds
     float           _integrator;            // integrator value
-    float           _input;                 // last input for derivative
+    float           _input;                 // current value for filter
+    float           _input1;                // n-1 value for filter
+    float           _input2;                // n-2 value for filter
+    float           _signal;                // current value of filter signal
+    float           _signal1;               // n-1 value of filter signal
+    float           _signal2;               // n-2 value of filter signal
+    float           _ntchsig;               // current value of notch signal
+    float           _ntchsig1;              // n-1 value of notch signal
+    float           _ntchsig2;              // n-2 value of notch signal
     float           _derivative;            // last derivative for low-pass filter
 
     DataFlash_Class::PID_Info        _pid_info;
