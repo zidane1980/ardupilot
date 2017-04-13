@@ -9,11 +9,8 @@ bool Copter::sport_init(bool ignore_checks)
 {
 
 #if FRAME_CONFIG == HELI_FRAME
-    // do not allow helis to enter Sport if the Rotor Runup is not complete and current control mode has manual throttle control,
-    // as this will force the helicopter to descend.
-    if (!ignore_checks && mode_has_manual_throttle(control_mode) && !motors.rotor_runup_complete()){
-        return false;
-    }
+    // Sport mode not available for helicopters
+    return false;
 #endif
 
     // initialize vertical speed and acceleration
@@ -75,12 +72,7 @@ void Copter::sport_run()
     float target_climb_rate = get_pilot_desired_climb_rate(channel_throttle->get_control_in());
     target_climb_rate = constrain_float(target_climb_rate, -g.pilot_velocity_z_max, g.pilot_velocity_z_max);
 
-#if FRAME_CONFIG == HELI_FRAME
-    // helicopters are held on the ground until rotor speed runup has finished
-    bool takeoff_triggered = (ap.land_complete && (target_climb_rate > 0.0f) && motors.rotor_runup_complete());
-#else
     bool takeoff_triggered = ap.land_complete && (target_climb_rate > 0.0f);
-#endif
 
     // State Machine Determination
     if (!motors.armed() || !motors.get_interlock()) {
@@ -100,15 +92,10 @@ void Copter::sport_run()
 
         motors.set_desired_spool_state(AP_Motors::DESIRED_SHUT_DOWN);
         attitude_control.input_euler_rate_roll_pitch_yaw(target_roll_rate, target_pitch_rate, target_yaw_rate);
-#if FRAME_CONFIG == HELI_FRAME
-        // force descent rate and call position controller
-        pos_control.set_alt_target_from_climb_rate(-abs(g.land_speed), G_Dt, false);
-#else
         attitude_control.relax_attitude_controllers();
         attitude_control.reset_rate_controller_I_terms();
         attitude_control.set_yaw_target_to_current_heading();
         pos_control.relax_alt_hold_controllers(0.0f);   // forces throttle output to go to zero
-#endif
         pos_control.update_z_controller();
         break;
 
