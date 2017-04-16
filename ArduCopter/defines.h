@@ -409,6 +409,11 @@ enum DevOptions {
 #define DATA_AVOIDANCE_PROXIMITY_ENABLE     65
 #define DATA_AVOIDANCE_PROXIMITY_DISABLE    66
 #define DATA_GPS_PRIMARY_CHANGED            67
+#define DATA_STATE_MOTORSTOPPED             68
+#define DATA_STATE_LANDED                   69
+#define DATA_STATE_TAKEOFF                  70
+#define DATA_STATE_FLYING                   71
+
 
 // Centi-degrees to radians
 #define DEGX100 5729.57795f

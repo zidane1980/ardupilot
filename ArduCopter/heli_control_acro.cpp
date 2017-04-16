@@ -54,6 +54,15 @@ void Copter::heli_acro_run()
         acro_state = Acro_Flying;
     }
 
+    // writes an event when state of aircraft changes
+    if (acro_state != acro_state_m1) {
+        if (acro_state == Acro_MotorStopped) {Log_Write_Event(DATA_STATE_MOTORSTOPPED);}
+        if (acro_state == Acro_Landed) {Log_Write_Event(DATA_STATE_LANDED);}
+        if (acro_state == Acro_Takeoff) {Log_Write_Event(DATA_STATE_TAKEOFF);}
+        if (acro_state == Acro_Flying) {Log_Write_Event(DATA_STATE_FLYING);}
+        acro_state_m1 = acro_state;
+    }
+
     // Acro State Machine
     switch (acro_state) {
 
