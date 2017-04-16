@@ -106,8 +106,23 @@ public:
     // reset rate controller I terms
     void reset_rate_controller_I_terms();
 
+    // leaks pitch target to vehicle pitch attitude
+    void leak_pitch_target_to_current_attitude() { shift_ef_pitch_target(degrees((_ahrs.pitch - _attitude_target_euler_angle.y)*_angle_leak_rate)*100.0f); }
+
+    // leaks roll target to vehicle roll attitude
+    void leak_roll_target_to_current_attitude() { shift_ef_roll_target(degrees((_ahrs.roll - _attitude_target_euler_angle.x)*_angle_leak_rate)*100.0f); }
+
+    // leaks yaw target to vehicle heading
+    void leak_yaw_target_to_current_heading() { shift_ef_yaw_target(degrees((_ahrs.yaw - _attitude_target_euler_angle.z)*_angle_leak_rate)*100.0f); }
+
     // Sets yaw target to vehicle heading
     void set_yaw_target_to_current_heading() { shift_ef_yaw_target(degrees(_ahrs.yaw - _attitude_target_euler_angle.z)*100.0f); }
+
+    // Shifts earth frame pitch target by pitch_shift_cd. Pitch_roll_cd should be in centidegrees and is added to the current target attitude
+    void shift_ef_pitch_target(float pitch_shift_cd);
+
+    // Shifts earth frame roll target by roll_shift_cd. roll_shift_cd should be in centidegrees and is added to the current target attitude
+    void shift_ef_roll_target(float roll_shift_cd);
 
     // Shifts earth frame yaw target by yaw_shift_cd. yaw_shift_cd should be in centidegrees and is added to the current target heading
     void shift_ef_yaw_target(float yaw_shift_cd);
@@ -299,6 +314,9 @@ protected:
 
     // Angle limit time constant (to maintain altitude)
     AP_Float            _angle_limit_tc;
+
+    // Rate at which target attitude will leak back to aircraft current attitude
+    AP_Float            _angle_leak_rate;
 
     // Maximum Pitch and Roll Attitude Error in degrees between target and current attitude
     AP_Float            _pr_attitude_error_limit;
