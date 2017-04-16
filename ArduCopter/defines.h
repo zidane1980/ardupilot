@@ -254,6 +254,14 @@ enum AcroModeState {
     Acro_Landed
 };
 
+// Stabilize states
+enum StabilizeModeState {
+    Stabilize_MotorStopped,
+    Stabilize_Takeoff,
+    Stabilize_Flying,
+    Stabilize_Landed
+};
+
 // Flip states
 enum FlipState {
     Flip_Start,
