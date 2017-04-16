@@ -243,6 +243,14 @@ enum SportModeState {
     Sport_Landed
 };
 
+// Acro states
+enum AcroModeState {
+    Acro_MotorStopped,
+    Acro_Takeoff,
+    Acro_Flying,
+    Acro_Landed
+};
+
 // Flip states
 enum FlipState {
     Flip_Start,
