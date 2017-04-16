@@ -25,6 +25,7 @@ void Copter::heli_stabilize_run()
     float target_roll, target_pitch;
     float target_yaw_rate;
     float pilot_throttle_scaled;
+    StabilizeModeState stabilize_state;
 
     // Tradheli should not reset roll, pitch, yaw targets when motors are not runup, because
     // we may be in autorotation flight.  These should be reset only when transitioning from disarmed
@@ -32,21 +33,43 @@ void Copter::heli_stabilize_run()
     // that the servos move in a realistic fashion while disarmed for operational checks.
     // Also, unlike multicopters we do not set throttle (i.e. collective pitch) to zero so the swash servos move
     
-    if(!motors->armed()) {
-        heli_flags.init_targets_on_arming=true;
-        attitude_control->set_yaw_target_to_current_heading();
-    }
-    
-    if(motors->armed() && heli_flags.init_targets_on_arming) {
-        attitude_control->set_yaw_target_to_current_heading();
-        if (motors->rotor_speed_above_critical()) {
-            heli_flags.init_targets_on_arming=false;
-        }
+    // check that collective pitch is on lower limit (should be constrained by LAND_COL_MIN)
+    bool motor_at_lower_limit = motors->limit.throttle_lower;
+
+    // check that the airframe is not accelerating (not falling or breaking after fast forward flight)
+    bool accel_stationary = (land_accel_ef_filter.get().length() <= LAND_DETECTOR_ACCEL_MAX);
+
+    // check that vertical speed is within 1m/s of zero
+    bool descent_rate_low = fabsf(inertial_nav.get_velocity_z()) < 100;
+
+    // Stabilize State Machine Determination
+    if (!motors->get_interlock() || !motors->rotor_runup_complete() || !motors->rotor_speed_above_critical()) {
+        stabilize_state = Stabilize_MotorStopped;
+    } else if (ap.land_complete && !motor_at_lower_limit && (!accel_stationary || !descent_rate_low)) {
+        stabilize_state = Stabilize_Takeoff;
+    } else if (ap.land_complete) {
+        stabilize_state = Stabilize_Landed;
+    } else {
+        stabilize_state = Stabilize_Flying;
     }
 
-    // clear landing flag above zero throttle
-    if (motors->armed() && motors->get_interlock() && motors->rotor_runup_complete() && !ap.throttle_zero) {
+    // Stabilize State Machine
+    switch (stabilize_state) {
+
+    case Stabilize_MotorStopped:
+        attitude_control->set_yaw_target_to_current_heading();
+        attitude_control->reset_rate_controller_I_terms();
+        break;
+    case Stabilize_Landed:
+        attitude_control->leak_yaw_target_to_current_heading();
+        break;
+    case Stabilize_Takeoff:
+        attitude_control->leak_yaw_target_to_current_heading();
         set_land_complete(false);
+        break;
+    case Stabilize_Flying:
+
+        break;
     }
 
     // apply SIMPLE mode transform to pilot inputs
