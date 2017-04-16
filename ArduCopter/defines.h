@@ -395,6 +395,10 @@ enum DevOptions {
 #define DATA_EKF_YAW_RESET                  62
 #define DATA_AVOIDANCE_ADSB_ENABLE          63
 #define DATA_AVOIDANCE_ADSB_DISABLE         64
+#define DATA_STATE_MOTORSTOPPED             65
+#define DATA_STATE_LANDED                   66
+#define DATA_STATE_TAKEOFF                  67
+#define DATA_STATE_FLYING                   68
 
 // Centi-degrees to radians
 #define DEGX100 5729.57795f

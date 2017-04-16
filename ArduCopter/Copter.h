@@ -587,6 +587,8 @@ private:
     // child class for AC3.4
 #if FRAME_CONFIG == HELI_FRAME
     AC_InputManager_Heli input_manager;
+    AcroModeState acro_state_m1 = Acro_Flying;
+    StabilizeModeState stabilize_state_m1 = Stabilize_Flying;
 #endif
 
     AP_ADSB adsb {ahrs};

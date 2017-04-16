@@ -53,6 +53,15 @@ void Copter::heli_stabilize_run()
         stabilize_state = Stabilize_Flying;
     }
 
+    // writes an event when state of aircraft changes
+    if (stabilize_state != stabilize_state_m1) {
+        if (stabilize_state == Stabilize_MotorStopped) {Log_Write_Event(DATA_STATE_MOTORSTOPPED);}
+        if (stabilize_state == Stabilize_Landed) {Log_Write_Event(DATA_STATE_LANDED);}
+        if (stabilize_state == Stabilize_Takeoff) {Log_Write_Event(DATA_STATE_TAKEOFF);}
+        if (stabilize_state == Stabilize_Flying) {Log_Write_Event(DATA_STATE_FLYING);}
+        stabilize_state_m1 = stabilize_state;
+    }
+
     // Stabilize State Machine
     switch (stabilize_state) {
 
