@@ -323,6 +323,12 @@ protected:
     // Angle limit time constant (to maintain altitude)
     AP_Float            _angle_limit_tc;
 
+    // Maximum Pitch and Roll Attitude Error in degrees between target and current attitude
+    AP_Float            _pr_attitude_error_limit;
+
+    // Maximum Heading Error in degrees between target and current attitude
+    AP_Float            _y_attitude_error_limit;
+
     // Intersampling period in seconds
     float               _dt;
 
