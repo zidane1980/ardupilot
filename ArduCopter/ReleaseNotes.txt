@@ -1,5 +1,16 @@
 APM:Copter Release Notes:
 ------------------------------------------------------------------
+Copter 3.4.6 Geyer V1.0 15-Apr-2017
+Changes from Copter 3.4.6
+1) added Notch filter to PID algorithm
+2) added parameter to allow user to adjust I term leak rate
+3) Limited maximum pitch and roll attitude error between target and current
+4) Limited maximum heading error between target and current 
+5) Added parameters that enable user to adjust maximum error or turn off feature
+6) Added state machines to trad heli stabilize and acro control run routines
+7) Enabled setting attitude target quaternion to aircraft current attitude during disarmed state for Trad Heli Acro Mode
+8) Enabled leaking of target pitch and roll attitude and heading to current values in Trad Heli Acro mode while not in dynamic flight
+------------------------------------------------------------------
 Copter 3.4.6 15-Mar-2017
 Changes from 3.4.5
 1) ensure WPNAV_LOIT_SPEED is non-zero to avoid divide-by-zero
