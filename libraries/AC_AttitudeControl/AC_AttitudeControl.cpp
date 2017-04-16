@@ -104,6 +104,13 @@ const AP_Param::GroupInfo AC_AttitudeControl::var_info[] = {
     // @User: Advanced
     AP_GROUPINFO("Y_ATT_ERROR", 18, AC_AttitudeControl, _y_attitude_error_limit, 0.0f),
 
+    // @Param: ANG_LEAK_RAT
+    // @DisplayName: Angle Leak Rate
+    // @Description: Rate at which target attitude will leak back to aircraft current attitude
+    // @Range: 0 1.0
+    // @User: Advanced
+    AP_GROUPINFO("ANG_LEAK_RAT", 19, AC_AttitudeControl, _angle_leak_rate, 0.0f),
+
     AP_GROUPEND
 };
 
@@ -550,6 +557,24 @@ Vector3f AC_AttitudeControl::euler_accel_limit(Vector3f euler_rad, Vector3f eule
         rot_accel.z = MIN(MIN(euler_accel.x/sin_theta, euler_accel.y/sin_phi), euler_accel.z/cos_phi);
     }
     return rot_accel;
+}
+
+// Shifts earth frame pitch target by pitch_shift_cd. pitch_shift_cd should be in centidegrees and is added to the current target pitch attitude
+void AC_AttitudeControl::shift_ef_pitch_target(float pitch_shift_cd)
+{
+    float pitch_shift = radians(pitch_shift_cd*0.01f);
+    Quaternion _attitude_target_update_quat;
+    _attitude_target_update_quat.from_axis_angle(Vector3f(0.0f, pitch_shift, 0.0f));
+    _attitude_target_quat = _attitude_target_update_quat*_attitude_target_quat;
+}
+
+// Shifts earth frame roll target by roll_shift_cd. roll_shift_cd should be in centidegrees and is added to the current target roll attitude
+void AC_AttitudeControl::shift_ef_roll_target(float roll_shift_cd)
+{
+    float roll_shift = radians(roll_shift_cd*0.01f);
+    Quaternion _attitude_target_update_quat;
+    _attitude_target_update_quat.from_axis_angle(Vector3f(roll_shift, 0.0f, 0.0f));
+    _attitude_target_quat = _attitude_target_update_quat*_attitude_target_quat;
 }
 
 // Shifts earth frame yaw target by yaw_shift_cd. yaw_shift_cd should be in centidegrees and is added to the current target heading
