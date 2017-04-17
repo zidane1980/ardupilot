@@ -12,6 +12,12 @@ void Copter::crash_check()
 {
     static uint16_t crash_counter;  // number of iterations vehicle may have been crashed
 
+#if FRAME_CONFIG == HELI_FRAME
+	// Heli never does crash check, there is no benefit and only risk.
+	crash_counter = 0;
+        return;
+#endif	
+	
     // return immediately if disarmed, or crash checking disabled
     if (!motors.armed() || ap.land_complete || g.fs_crash_check == 0) {
         crash_counter = 0;
