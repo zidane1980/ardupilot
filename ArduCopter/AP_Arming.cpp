@@ -385,6 +385,13 @@ void AP_Arming_Copter::pre_arm_rc_checks(const bool display_failure)
         }
     }
 
+#if FRAME_CONFIG == HELI_FRAME
+	// check if RC8 has been calibrated
+    if(!RC_Channels::rc_channel(CH_8)->min_max_configured()) {
+        return;
+    }
+#endif
+
     // if we've gotten this far rc is ok
     set_pre_arm_rc_check(true);
 }
