@@ -97,13 +97,13 @@ void Copter::loiter_run()
     case Loiter_MotorStopped:
 
         motors.set_desired_spool_state(AP_Motors::DESIRED_SHUT_DOWN);
+        attitude_control.set_yaw_target_to_current_heading();
 #if FRAME_CONFIG == HELI_FRAME
         // force descent rate and call position controller
         pos_control.set_alt_target_from_climb_rate(-abs(g.land_speed), G_Dt, false);
 #else
         wp_nav.init_loiter_target();
         attitude_control.reset_rate_controller_I_terms();
-        attitude_control.set_yaw_target_to_current_heading();
         pos_control.relax_alt_hold_controllers(0.0f);   // forces throttle output to go to zero
 #endif
         wp_nav.update_loiter(ekfGndSpdLimit, ekfNavVelGainScaler);
