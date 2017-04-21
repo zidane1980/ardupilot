@@ -469,6 +469,13 @@ void Copter::pre_arm_rc_checks()
         return;
     }
 
+#if FRAME_CONFIG == HELI_FRAME
+	// check if RC8 has been calibrated
+    if(!g.rc_8.min_max_configured()) {
+        return;
+    }
+#endif
+
     // if we've gotten this far rc is ok
     set_pre_arm_rc_check(true);
 }
