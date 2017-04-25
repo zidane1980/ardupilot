@@ -1,5 +1,14 @@
 APM:Copter Release Notes:
 ------------------------------------------------------------------
+Copter 3.4.6 Geyer V1.1-rc1 24-Apr-2017
+Changes from Copter 3.4.6 Geyer V1.0
+1) Restricted Trad Heli from being able to use Autotune, Flip, Drift, Poshold and Sport modes
+2) Reset yaw to current heading in the motor stopped state for AltHold and Loiter modes
+3) Out of bounds checking for incoming signals on channel 8
+4) Ensure RC8 has been calibrated
+5) Protect mode change from out of bounds values
+6) Prevent system from processing RSC controls during radio failsafe condition
+------------------------------------------------------------------
 Copter 3.4.6 Geyer V1.0 15-Apr-2017
 Changes from Copter 3.4.6
 1) added Notch filter to PID algorithm
