@@ -7,6 +7,15 @@
 // sport_init - initialise sport controller
 bool Copter::sport_init(bool ignore_checks)
 {
+
+#if FRAME_CONFIG == HELI_FRAME
+    // do not allow helis to enter Sport if the Rotor Runup is not complete and current control mode has manual throttle control,
+    // as this will force the helicopter to descend.
+    if (!ignore_checks && mode_has_manual_throttle(control_mode) && !motors->rotor_runup_complete()){
+        return false;
+    }
+#endif
+
     // initialize vertical speed and acceleration
     pos_control->set_speed_z(-g.pilot_velocity_z_max, g.pilot_velocity_z_max);
     pos_control->set_accel_z(g.pilot_accel_z);
