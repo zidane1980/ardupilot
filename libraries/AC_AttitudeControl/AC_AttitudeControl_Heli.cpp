@@ -296,8 +296,8 @@ void AC_AttitudeControl_Heli::rate_bf_to_motor_roll_pitch(const Vector3f &rate_r
     float roll_out, pitch_out;
 
     // calculate error
-    rate_roll_error_rads = rate_roll_target_rads - rate_rads.x;
-    rate_pitch_error_rads = rate_pitch_target_rads - rate_rads.y;
+    rate_roll_error_rads = rate_roll_target_rads - _pid_rate_roll.notch_filter_gyro(gyro.x);
+    rate_pitch_error_rads = rate_pitch_target_rads - _pid_rate_pitch.notch_filter_gyro(gyro.y);
 
     // pass error to PID controller
     _pid_rate_roll.set_input_filter_all(rate_roll_error_rads);
@@ -392,7 +392,7 @@ float AC_AttitudeControl_Heli::rate_target_to_motor_yaw(float rate_yaw_actual_ra
     float yaw_out;
 
     // calculate error and call pid controller
-    rate_error_rads  = rate_target_rads - rate_yaw_actual_rads;
+    rate_error_rads  = rate_target_rads - _pid_rate_yaw.notch_filter_gyro(current_rate_rads);
 
     // pass error to PID controller
     _pid_rate_yaw.set_input_filter_all(rate_error_rads);

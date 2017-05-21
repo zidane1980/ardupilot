@@ -48,6 +48,12 @@ const AP_Param::GroupInfo AC_HELI_PID::var_info[] = {
     // @Unit: Hz
     AP_GROUPINFO("NTCH", 8, AC_HELI_PID, _notch_hz, AC_PID_NOTCH_HZ_DEFAULT),
 
+
+    // @Param: NOTCH_Q
+    // @DisplayName: PID Notch filter Q factor
+    // @Description: Notch filter Q factor changing depth and width
+    // @Unit: none
+    AP_GROUPINFO("NCHQ", 9, AC_HELI_PID, _notch_Q, AC_PID_NOTCH_Q_DEFAULT),
     // index 8 was for AFF, now removed
 
     AP_GROUPEND
@@ -59,6 +65,15 @@ AC_HELI_PID::AC_HELI_PID(float initial_p, float initial_i, float initial_d, floa
 {
     _ff = initial_ff;
     _last_requested_rate = 0;
+    _signal = 0.0f;
+    _signal1 = 0.0f;
+    _signal2 = 0.0f;
+    _ntchsig = 0.0f;
+    _ntchsig1 = 0.0f;
+    _ntchsig2 = 0.0f;
+
+    // reset input filter to first value received
+    _flags._reset_notch = true;
 }
 
 // This is an integrator which tends to decay to zero naturally
@@ -86,4 +101,51 @@ float AC_HELI_PID::get_leaky_i(float leak_rate)
         return _integrator;
     }
     return 0;
+}
+
+// notch_filter_gyro - apply notch filter to gyro
+float AC_HELI_PID::notch_filter_gyro(float input)
+{
+    // don't process inf or NaN
+    if (!isfinite(input)) {
+        return input;
+    }
+
+    // reset input filter to value received
+    if (_flags._reset_notch) {
+        _flags._reset_notch = false;
+        _signal = input;
+        _signal1 = input;
+        _signal2 = input;
+        _ntchsig = input;
+        _ntchsig1 = input;
+        _ntchsig2 = input;
+    }
+
+    _ntchsig=input;
+
+// 2nd order notch filter
+//    float notch_hz = 6.2f;
+    if (_notch_hz > 0.0f ) {
+      float notch_c = 1/tanf(M_PI*_dt*_notch_hz);
+      float n0 = _notch_Q*(notch_c*notch_c+1.0f);
+      float n1 =-2.0f*_notch_Q*(notch_c*notch_c-1.0f);
+      float n2 = n0;
+      float d0 = notch_c*notch_c*_notch_Q+notch_c+_notch_Q;
+      float d1 = -2.0f*_notch_Q*(notch_c*notch_c-1.0f);
+      float d2 = notch_c*notch_c*_notch_Q-notch_c+_notch_Q;
+      _signal = (n0*_ntchsig+n1*_ntchsig1+n2*_ntchsig2-d1*_signal1-d2*_signal2)/d0;
+    } else {
+      _signal = _ntchsig;
+      _signal1 = _ntchsig1;
+      _signal2 = _ntchsig2;
+    }
+
+// Update n-1, and n-2 values of filter and signal for next iteration
+    _ntchsig2 = _ntchsig1;
+    _ntchsig1 = _ntchsig;
+    _signal2 = _signal1;
+    _signal1 = _signal;
+
+return _signal;
 }
