@@ -1,5 +1,10 @@
 ArduPilot Copter Release Notes:
 ------------------------------------------------------------------
+Copter 3.5-rc7 Geyer V1.0 25-May-2017
+Changes from 3.5-rc7
+1) added notch filter
+2) added parameter to set integrator leak rate
+------------------------------------------------------------------
 Copter 3.5-rc7 25-May-2017
 Changes from 3.5-rc6
 1) Bug fixes and minor enhancements:
