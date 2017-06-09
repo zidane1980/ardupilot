@@ -32,15 +32,10 @@ public:
     // reset_filter - input filter will be reset to the next value provided to set_input()
     void        reset_notch();
 
-    // accessors
-    float       ff() const { return _vff.get(); }
-    void        ff(const float v) { _vff.set(v); }
-
     static const struct AP_Param::GroupInfo        var_info[];
 
 private:
     // parameters
-    AP_Float        _vff;
     AP_Float        _leak_min;
     AP_Float        _notch_hz;                   // PID Input notch filter frequency in Hz
     AP_Float        _notch_Q;                   // PID Input notch filter Q factor
