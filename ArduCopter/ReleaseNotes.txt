@@ -1,5 +1,9 @@
 ArduPilot Copter Release Notes:
 ------------------------------------------------------------------
+Copter 3.5-rc7 Geyer V2.0 8-June-2017
+Changes from 3.5-rc7 Geyer V1.0
+1) Changed notch filter to filter only gyro
+------------------------------------------------------------------
 Copter 3.5-rc7 Geyer V1.0 25-May-2017
 Changes from 3.5-rc7
 1) added notch filter
