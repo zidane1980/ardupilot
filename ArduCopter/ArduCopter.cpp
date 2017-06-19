@@ -121,7 +121,7 @@ const AP_Scheduler::Task Copter::scheduler_tasks[] = {
     SCHED_TASK(update_mount,          50,     75),
     SCHED_TASK(update_trigger,        50,     75),
     SCHED_TASK(ten_hz_logging_loop,   10,    350),
-    SCHED_TASK(twentyfive_hz_logging, 25,    110),
+    SCHED_TASK(twentyfive_hz_logging, 50,    110),
     SCHED_TASK(dataflash_periodic,    400,    300),
     SCHED_TASK(perf_update,           0.1,    75),
     SCHED_TASK(read_receiver_rssi,    10,     75),
@@ -388,12 +388,14 @@ void Copter::ten_hz_logging_loop()
             DataFlash.Log_Write_PID(LOG_PIDY_MSG, attitude_control->get_rate_yaw_pid().get_pid_info());
             DataFlash.Log_Write_PID(LOG_PIDA_MSG, g.pid_accel_z.get_pid_info() );
         }
+        if (should_log(MASK_LOG_RCIN)) {
+            DataFlash.Log_Write_RCIN();
+        }
     }
     if (should_log(MASK_LOG_MOTBATT)) {
         Log_Write_MotBatt();
     }
     if (should_log(MASK_LOG_RCIN)) {
-        DataFlash.Log_Write_RCIN();
         if (rssi.enabled()) {
             DataFlash.Log_Write_RSSI(rssi);
         }
@@ -434,6 +436,9 @@ void Copter::twentyfive_hz_logging()
             DataFlash.Log_Write_PID(LOG_PIDP_MSG, attitude_control->get_rate_pitch_pid().get_pid_info());
             DataFlash.Log_Write_PID(LOG_PIDY_MSG, attitude_control->get_rate_yaw_pid().get_pid_info());
             DataFlash.Log_Write_PID(LOG_PIDA_MSG, g.pid_accel_z.get_pid_info() );
+        }
+        if (should_log(MASK_LOG_RCIN)) {
+            DataFlash.Log_Write_RCIN();
         }
     }
 
