@@ -63,6 +63,17 @@ float Copter::get_pilot_desired_yaw_rate(int16_t stick_angle)
         y_out = (g2.acro_y_expo * y_in3) + ((1.0f - g2.acro_y_expo) * y_in);
         yaw_request = ROLL_PITCH_YAW_INPUT_MAX * y_out * g.acro_yaw_p;
     }
+
+#if FRAME_CONFIG == HELI_FRAME
+    if ((AP_Motors::motor_frame_class)g2.frame_class.get() == AP_Motors::MOTOR_FRAME_HELI_COMPOUND) {
+
+        //get boost
+        float boost = (float)RC_Channels::rc_channel(CH_7)->get_control_in() * 0.001f;
+        //set boost
+        motors->set_boost(boost);
+    }
+#endif
+
     // convert pilot input to the desired yaw rate
     return yaw_request;
 }
