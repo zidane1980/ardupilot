@@ -7,6 +7,12 @@
 // brake_init - initialise brake controller
 bool Copter::brake_init(bool ignore_checks)
 {
+#if FRAME_CONFIG == HELI_FRAME
+    //keep compound-heli from using this mode
+    if ((AP_Motors::motor_frame_class)g2.frame_class.get() == AP_Motors::MOTOR_FRAME_HELI_COMPOUND) {
+        return false;
+    }
+#endif
     if (position_ok() || ignore_checks) {
 
         // set desired acceleration to zero

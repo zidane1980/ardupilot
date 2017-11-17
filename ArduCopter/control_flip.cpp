@@ -39,6 +39,13 @@ int8_t    flip_pitch_dir;           // pitch direction (-1 = pitch forward, 1 = 
 // flip_init - initialise flip controller
 bool Copter::flip_init(bool ignore_checks)
 {
+#if FRAME_CONFIG == HELI_FRAME
+    //keep compound-heli from using this mode
+    if ((AP_Motors::motor_frame_class)g2.frame_class.get() == AP_Motors::MOTOR_FRAME_HELI_COMPOUND) {
+        return false;
+    }
+#endif
+
     // only allow flip from ACRO, Stabilize, AltHold or Drift flight modes
     if (control_mode != ACRO && control_mode != STABILIZE && control_mode != ALT_HOLD) {
         return false;

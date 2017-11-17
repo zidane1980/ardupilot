@@ -80,6 +80,10 @@ bool Copter::poshold_init(bool ignore_checks)
     if (!ignore_checks && !motors->rotor_runup_complete()){
         return false;
     }
+    //keep compound-heli from using this mode
+    if ((AP_Motors::motor_frame_class)g2.frame_class.get() == AP_Motors::MOTOR_FRAME_HELI_COMPOUND) {
+        return false;
+    }
 #endif
 
     // fail to initialise PosHold mode if no GPS lock
