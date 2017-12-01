@@ -1,5 +1,10 @@
 ArduPilot Copter Release Notes:
 ------------------------------------------------------------------
+Copter 3.5-rc7 Geyer V3.0 28-July-2017
+Changes from 3.5-rc7 Geyer V2.1
+1) Added automated frequency sweep function
+2) Added sweep signal to RATE message for logging
+------------------------------------------------------------------
 Copter 3.5-rc7 Geyer V2.1 18-June-2017
 Changes from 3.5-rc7 Geyer V2.0
 1) Added RCIN to ATT logging and changed 25hz logging to 50 hz
