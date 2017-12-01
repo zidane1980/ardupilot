@@ -92,6 +92,50 @@ const AP_Param::GroupInfo AC_AttitudeControl::var_info[] = {
     // @User: Advanced
     AP_GROUPINFO("ANG_LIM_TC", 16, AC_AttitudeControl, _angle_limit_tc, AC_ATTITUDE_CONTROL_ANGLE_LIMIT_TC_DEFAULT),
 
+    // @Param: SWEEP_MIN
+    // @DisplayName: Sweep Minimum Frequency
+    // @Description: Automated Sweep minimum frequency in rad/sec
+    // @Range: 0.1 2
+    // @User: Advanced
+    AP_GROUPINFO("SWEEP_MIN", 17, AC_AttitudeControl, _sweep_min_freq, 0.4f),
+
+    // @Param: SWEEP_MAX
+    // @DisplayName: Sweep Maximum Frequency
+    // @Description: Automated Sweep maximum frequency in rad/sec
+    // @Range: 2 60
+    // @User: Advanced
+    AP_GROUPINFO("SWEEP_MAX", 18, AC_AttitudeControl, _sweep_max_freq, 30.0f),
+
+    // @Param: SWEEP_AMPL
+    // @DisplayName: Sweep Amplitude
+    // @Description: Automated Sweep Amplitude
+    // @Range: 0.1 2
+    // @User: Advanced
+    AP_GROUPINFO("SWEEP_AMPL", 19, AC_AttitudeControl, _sweep_amplitude, 0.1f),
+
+    // @Param: SWEEP_LENGTH
+    // @DisplayName: Sweep Length
+    // @Description: Length of Automated Sweep in seconds
+    // @Range: 60 240
+    // @User: Advanced
+    AP_GROUPINFO("SWEEP_LENGTH", 20, AC_AttitudeControl, _sweep_length, 90),
+
+    // @Param: SWEEP_AXIS
+    // @DisplayName: Sweep Input Axis
+    // @Description: Automated Sweep Input Axis
+    // @Range: 0 3
+    // @Values: 0:Disabled, 1:Pitch, 2:Roll, 3:Yaw
+    // @User: Advanced
+    AP_GROUPINFO("SWEEP_AXIS", 21, AC_AttitudeControl, _sweep_axis, 0),
+
+    // @Param: SWEEP_INPUT
+    // @DisplayName: Sweep Input
+    // @Description: Automated Sweep Input point in code
+    // @Range: 0 2
+    // @Values: 0:Disabled, 1:Disturbance rejection, 2:broken loop
+    // @User: Advanced
+    AP_GROUPINFO("SWEEP_INPUT", 22, AC_AttitudeControl, _sweep_input, 0),
+
     AP_GROUPEND
 };
 
@@ -200,6 +244,16 @@ void AC_AttitudeControl::input_euler_angle_roll_pitch_euler_rate_yaw(float euler
 
     // calculate the attitude target euler angles
     _attitude_target_quat.to_euler(_attitude_target_euler_angle.x, _attitude_target_euler_angle.y, _attitude_target_euler_angle.z);
+
+    if (_sweep_input==1) {
+        if (_sweep_axis==1){
+            _attitude_target_euler_angle.x = _attitude_target_euler_angle.x + _sweep_output;
+        } else if (_sweep_axis==2) {
+            _attitude_target_euler_angle.y = _attitude_target_euler_angle.y + _sweep_output;
+        } else if (_sweep_axis==3) {
+            _attitude_target_euler_angle.z = _attitude_target_euler_angle.z + _sweep_output;
+        }
+    }
 
     // ensure smoothing gain can not cause overshoot
     smoothing_gain = constrain_float(smoothing_gain,1.0f,1/_dt);
@@ -634,6 +688,10 @@ float AC_AttitudeControl::rate_target_to_motor_roll(float rate_actual_rads, floa
     // Compute output in range -1 ~ +1
     float output = get_rate_roll_pid().get_p() + integrator + get_rate_roll_pid().get_d() + get_rate_roll_pid().get_ff(rate_target_rads);
 
+    if (_sweep_axis==1 && _sweep_input==2){
+        output = output + _sweep_output;
+    }
+
     // Constrain output
     return constrain_float(output, -1.0f, 1.0f);
 }
@@ -657,6 +715,10 @@ float AC_AttitudeControl::rate_target_to_motor_pitch(float rate_actual_rads, flo
     // Compute output in range -1 ~ +1
     float output = get_rate_pitch_pid().get_p() + integrator + get_rate_pitch_pid().get_d() + get_rate_pitch_pid().get_ff(rate_target_rads);
 
+    if (_sweep_axis==2 && _sweep_input==2){
+        output = output + _sweep_output;
+    }
+
     // Constrain output
     return constrain_float(output, -1.0f, 1.0f);
 }
@@ -679,6 +741,10 @@ float AC_AttitudeControl::rate_target_to_motor_yaw(float rate_actual_rads, float
 
     // Compute output in range -1 ~ +1
     float output = get_rate_yaw_pid().get_p() + integrator + get_rate_yaw_pid().get_d() + get_rate_yaw_pid().get_ff(rate_target_rads);
+
+    if (_sweep_axis==3 && _sweep_input==2){
+        output = output + _sweep_output;
+    }
 
     // Constrain output
     return constrain_float(output, -1.0f, 1.0f);
@@ -780,4 +846,63 @@ float AC_AttitudeControl::max_rate_step_bf_yaw()
     float alpha = get_rate_yaw_pid().get_filt_alpha();
     float alpha_remaining = 1-alpha;
     return 2.0f*_motors.get_throttle_hover()*AC_ATTITUDE_RATE_RP_CONTROLLER_OUT_MAX/((alpha_remaining*alpha_remaining*alpha_remaining*alpha*get_rate_yaw_pid().kD())/_dt + get_rate_yaw_pid().kP());
+}
+
+// Automated frequency sweep
+float AC_AttitudeControl::auto_sweep()
+{
+    float dtSweep = 0.0025;
+    float c1Sweep = 4;
+    float c2Sweep = 0.0187;
+    float kSweep;
+    float wSweep;
+    float sweepInput;
+    float tim;
+
+    float TrecLowFreq = floorf(2*M_PI/_sweep_min_freq);
+    float loopCounterLowFreq = floorf(TrecLowFreq/dtSweep);
+    float loopCounterMaxSweep = floorf(_sweep_length/dtSweep);
+
+    if (_sweep_flag && loopCounterSweep==0) {
+        thetaSweep = 0;
+        kSweep = 0;
+        wSweep = 0;
+        sweepInput = 0;
+        loopCounterSweep = 1;
+    } else if (_sweep_flag && loopCounterSweep>0) {
+        if (loopCounterSweep < loopCounterLowFreq) {
+            wSweep = _sweep_min_freq;
+            thetaSweep = thetaSweep + wSweep*dtSweep;
+            loopCounterSweep++;
+        } else if (loopCounterSweep < loopCounterMaxSweep) {
+            kSweep = c2Sweep*( expf(c1Sweep*(((float)loopCounterSweep-loopCounterLowFreq)*dtSweep) / (_sweep_length-TrecLowFreq) ) - 1 );
+            wSweep = _sweep_min_freq + kSweep*(_sweep_max_freq - _sweep_min_freq);
+            thetaSweep = thetaSweep + wSweep*dtSweep;
+            loopCounterSweep++;
+        } else {
+            thetaSweep = 0;
+        }
+        if (_sweep_input==1 || _sweep_input==2){
+            sweepInput = _sweep_amplitude*sinf(thetaSweep);
+//        } else if(_sweep_input==2){
+//            sweepInput = (thetaSweep/(((float)loopCounterSweep-1)*dtSweep))*_sweep_amplitude*cosf(thetaSweep);
+        } else {
+            sweepInput = 0;
+        }
+    } else if (!_sweep_flag) {
+        loopCounterSweep=0;
+        sweepInput = 0;
+    }
+
+/*    if (_sweep_flag && !_sweep_flag_m1) {
+        loopCounterSwp=1;
+    } else if (_sweep_flag && loopCounterSwp>0) {
+        tim = dtSweep * (float)loopCounterSwp;
+        sweepInput = _sweep_amplitude*sinf(tim * 6.0f);
+        loopCounterSwp++;
+    }
+*/
+    _sweep_flag_m1 = _sweep_flag;
+
+    return sweepInput;
 }
