@@ -236,6 +236,12 @@ public:
     // Calculates the body frame angular velocities to follow the target attitude
     void attitude_controller_run_quat();
 
+    // Sets auto sweep flag
+    void set_sweep_flag(bool swp_flag) { _sweep_flag = swp_flag; _sweep_output = auto_sweep(); }
+
+    // Return current sweep output value.
+    float get_sweep() const { return _sweep_output; }
+
     // sanity check parameters.  should be called once before take-off
     virtual void parameter_sanity_check() {}
 
@@ -296,6 +302,9 @@ protected:
 
     // Return the tilt angle limit in radians
     float get_tilt_limit_rad() { return radians(_aparm.angle_max*0.01f); }
+
+    // automated frequency sweep method
+    float auto_sweep();
 
     // Maximum rate the yaw target can be updated in Loiter, RTL, Auto flight modes
     AP_Float            _slew_yaw;
@@ -369,6 +378,37 @@ protected:
 
     // mix between throttle and hover throttle for 0 to 1 and ratio above hover throttle for >1
     float               _throttle_rpy_mix;
+
+    // Automated Frequency Sweep minimum frequency
+    AP_Float            _sweep_min_freq;
+
+    // Automated Frequency Sweep maximum frequency
+    AP_Float            _sweep_max_freq;
+
+    // Automated Frequency Sweep Amplitude
+    AP_Float            _sweep_amplitude;
+
+    // Automated Frequency Sweep input axis
+    AP_Int8             _sweep_axis;
+
+    // Automated Frequency Sweep analysis type (broken loop or disturbance rejection)
+    AP_Int8             _sweep_input;
+
+    // Length of automated sweep
+    AP_Int16            _sweep_length;
+
+    // flags used to determine if sweep is running
+    bool                _sweep_flag;
+    bool                _sweep_flag_m1;
+
+    // Automated Frequency Sweep current value
+    float               _sweep_output;
+
+    // Automated frequency sweep counter
+    uint16_t            loopCounterSweep;
+
+    // Automated Frequency Sweep current frequency
+    float               thetaSweep;
 
     // References to external libraries
     const AP_AHRS_View&  _ahrs;
