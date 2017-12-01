@@ -857,7 +857,6 @@ float AC_AttitudeControl::auto_sweep()
     float kSweep;
     float wSweep;
     float sweepInput;
-    float tim;
 
     float TrecLowFreq = floorf(2*M_PI/_sweep_min_freq);
     float loopCounterLowFreq = floorf(TrecLowFreq/dtSweep);
@@ -884,8 +883,6 @@ float AC_AttitudeControl::auto_sweep()
         }
         if (_sweep_input==1 || _sweep_input==2){
             sweepInput = _sweep_amplitude*sinf(thetaSweep);
-//        } else if(_sweep_input==2){
-//            sweepInput = (thetaSweep/(((float)loopCounterSweep-1)*dtSweep))*_sweep_amplitude*cosf(thetaSweep);
         } else {
             sweepInput = 0;
         }
@@ -894,14 +891,6 @@ float AC_AttitudeControl::auto_sweep()
         sweepInput = 0;
     }
 
-/*    if (_sweep_flag && !_sweep_flag_m1) {
-        loopCounterSwp=1;
-    } else if (_sweep_flag && loopCounterSwp>0) {
-        tim = dtSweep * (float)loopCounterSwp;
-        sweepInput = _sweep_amplitude*sinf(tim * 6.0f);
-        loopCounterSwp++;
-    }
-*/
     _sweep_flag_m1 = _sweep_flag;
 
     return sweepInput;
