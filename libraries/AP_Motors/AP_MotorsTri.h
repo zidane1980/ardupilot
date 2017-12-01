@@ -47,6 +47,12 @@ public:
     //  this can be used to ensure other pwm outputs (i.e. for servos) do not conflict
     virtual uint16_t    get_motor_mask();
 
+    // set_boost - engage the booster
+    void set_boost(float boost_in) override { _boost_in = boost_in;}
+
+    // get_boost - return current value of the booster
+    float get_boost() const override { return _boost_in; }
+
 protected:
     // output - sends commands to the motors
     void                output_armed_stabilizing();
@@ -64,4 +70,7 @@ protected:
     float           _thrust_right;
     float           _thrust_rear;
     float           _thrust_left;
+
+private:
+    float _boost_in;
 };

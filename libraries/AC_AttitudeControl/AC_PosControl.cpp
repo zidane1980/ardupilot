@@ -24,7 +24,7 @@ const AP_Param::GroupInfo AC_PosControl::var_info[] = {
 // their values.
 //
 AC_PosControl::AC_PosControl(const AP_AHRS_View& ahrs, const AP_InertialNav& inav,
-                             const AP_Motors& motors, AC_AttitudeControl& attitude_control,
+                             AP_Motors& motors, AC_AttitudeControl& attitude_control,
                              AC_P& p_pos_z, AC_P& p_vel_z, AC_PID& pid_accel_z,
                              AC_P& p_pos_xy, AC_PI_2D& pi_vel_xy) :
     _ahrs(ahrs),
@@ -997,7 +997,13 @@ void AC_PosControl::accel_to_lean_angles(float dt, float ekfNavVelGainScaler, bo
     accel_right = -accel_target_filtered.x*_ahrs.sin_yaw() + accel_target_filtered.y*_ahrs.cos_yaw();
 
     // update angle targets that will be passed to stabilize controller
-    _pitch_target = constrain_float(atanf(-accel_forward/(GRAVITY_MSS * 100))*(18000/M_PI),-lean_angle_max, lean_angle_max);
+    //keep compound-heli from using this mode
+    if (_motors.get_frame_class() == AP_Motors::MOTOR_FRAME_HELI_COMPOUND) {
+        _motors.set_boost(accel_forward * 0.001f);
+        _pitch_target = 0.0f;    
+    } else {
+        _pitch_target = constrain_float(atanf(-accel_forward/(GRAVITY_MSS * 100))*(18000/M_PI),-lean_angle_max, lean_angle_max);
+    }
     float cos_pitch_target = cosf(_pitch_target*M_PI/18000);
     _roll_target = constrain_float(atanf(accel_right*cos_pitch_target/(GRAVITY_MSS * 100))*(18000/M_PI), -lean_angle_max, lean_angle_max);
 }
@@ -1006,8 +1012,13 @@ void AC_PosControl::accel_to_lean_angles(float dt, float ekfNavVelGainScaler, bo
 void AC_PosControl::lean_angles_to_accel(float& accel_x_cmss, float& accel_y_cmss) const
 {
     // rotate our roll, pitch angles into lat/lon frame
-    accel_x_cmss = (GRAVITY_MSS * 100) * (-(_ahrs.cos_yaw() * _ahrs.sin_pitch() / MAX(_ahrs.cos_pitch(),0.5f)) - _ahrs.sin_yaw() * _ahrs.sin_roll() / MAX(_ahrs.cos_roll(),0.5f));
-    accel_y_cmss = (GRAVITY_MSS * 100) * (-(_ahrs.sin_yaw() * _ahrs.sin_pitch() / MAX(_ahrs.cos_pitch(),0.5f)) + _ahrs.cos_yaw() * _ahrs.sin_roll() / MAX(_ahrs.cos_roll(),0.5f));
+    if (_motors.get_frame_class() == AP_Motors::MOTOR_FRAME_HELI_COMPOUND) {
+        accel_x_cmss = (GRAVITY_MSS * 100) * ( - _ahrs.sin_yaw() * _ahrs.sin_roll() / MAX(_ahrs.cos_roll(),0.5f)) - _ahrs.cos_yaw() * _motors.get_boost() * 1000.0f;
+        accel_y_cmss = (GRAVITY_MSS * 100) * ( _ahrs.cos_yaw() * _ahrs.sin_roll() / MAX(_ahrs.cos_roll(),0.5f)) - _ahrs.sin_yaw() * _motors.get_boost() * 1000.0f;
+    } else {
+        accel_x_cmss = (GRAVITY_MSS * 100) * (-(_ahrs.cos_yaw() * _ahrs.sin_pitch() / MAX(_ahrs.cos_pitch(),0.5f)) - _ahrs.sin_yaw() * _ahrs.sin_roll() / MAX(_ahrs.cos_roll(),0.5f));
+        accel_y_cmss = (GRAVITY_MSS * 100) * (-(_ahrs.sin_yaw() * _ahrs.sin_pitch() / MAX(_ahrs.cos_pitch(),0.5f)) + _ahrs.cos_yaw() * _ahrs.sin_roll() / MAX(_ahrs.cos_roll(),0.5f));
+    }
 }
 
 /// calc_leash_length - calculates the horizontal leash length given a maximum speed, acceleration and position kP gain

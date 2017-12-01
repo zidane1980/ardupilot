@@ -30,6 +30,12 @@ public:
     // return 0 motor mask
     uint16_t get_motor_mask() { return 0; }
 
+    // set_boost - engage the booster
+    void set_boost(float boost_in) override { _boost_in = boost_in;}
+
+    // get_boost - return current value of the booster
+    float get_boost() const override { return _boost_in; }
+
 protected:
     // calculate motor outputs
     void output_armed_stabilizing();
@@ -39,4 +45,7 @@ protected:
     float _elevator; // -1..1
     float _rudder;   // -1..1
     float _throttle; // 0..1
+
+private:
+    float _boost_in;
 };

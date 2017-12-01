@@ -133,6 +133,9 @@ public:
     // pilot input for boost for compound heli
     virtual void        set_boost(float boost_in) {}
 
+    // current value for boost in controller
+    virtual float       get_boost() const = 0;
+
     // var_info for holding Parameter information
     static const struct AP_Param::GroupInfo var_info[];
 

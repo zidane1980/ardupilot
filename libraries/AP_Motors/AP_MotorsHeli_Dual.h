@@ -95,6 +95,9 @@ public:
     // set_boost - engage the booster
     void set_boost(float boost_in) override { _boost_in = boost_in;}
 
+    // get_boost - return current value of the booster
+    float get_boost() const override { return _boost_in; }
+    
     // var_info for holding Parameter information
     static const struct AP_Param::GroupInfo var_info[];
 

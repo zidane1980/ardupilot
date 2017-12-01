@@ -131,6 +131,9 @@ public:
     // set frame class (i.e. quad, hexa, heli) and type (i.e. x, plus)
     virtual void        set_frame_class_and_type(motor_frame_class frame_class, motor_frame_type frame_type) = 0;
 
+    // get_frame_class - gets contents of _last_frame_class
+    enum motor_frame_class get_frame_class(void) const { return _current_motor_frame_class; }
+
     // enable - starts allowing signals to be sent to motors
     virtual void        enable() = 0;
 
@@ -158,6 +161,12 @@ public:
     enum pwm_type { PWM_TYPE_NORMAL=0, PWM_TYPE_ONESHOT=1, PWM_TYPE_ONESHOT125=2, PWM_TYPE_BRUSHED16kHz=3 };
     pwm_type            get_pwm_type(void) const { return (pwm_type)_pwm_type.get(); }
     
+    // pilot input for boost for compound heli
+    virtual void        set_boost(float boost_in) {}
+
+    // current value for boost in controller
+    virtual float       get_boost() const = 0;
+
 protected:
     // output functions that should be overloaded by child classes
     virtual void        output_armed_stabilizing()=0;
@@ -218,4 +227,5 @@ protected:
     float _yaw_radio_passthrough = 0.0f;      // yaw input from pilot in -1 ~ +1 range.  used for setup and providing servo feedback while landed
 
     AP_Int8             _pwm_type;            // PWM output type
+    motor_frame_class   _current_motor_frame_class;
 };
