@@ -204,6 +204,11 @@ void AC_AttitudeControl_Multi::set_throttle_out(float throttle_in, bool apply_an
         // Clear angle_boost for logging purposes
         _angle_boost = 0.0f;
     }
+
+    if (_sweep_axis==4 && _sweep_input==2){
+        throttle_in = throttle_in + _sweep_output;
+    }
+
     _motors.set_throttle(throttle_in);
     _motors.set_throttle_avg_max(get_throttle_avg_max(MAX(throttle_in, _throttle_in)));
 }

@@ -445,6 +445,11 @@ void AC_AttitudeControl_Heli::set_throttle_out(float throttle_in, bool apply_ang
     _throttle_in = throttle_in;
     update_althold_lean_angle_max(throttle_in);
     _motors.set_throttle_filter_cutoff(filter_cutoff);
+
+    if (_sweep_axis==4 && _sweep_input==2){
+        throttle_in = throttle_in + _sweep_output;
+    }
+
     _motors.set_throttle(throttle_in);
     // Clear angle_boost for logging purposes
     _angle_boost = 0.0f;

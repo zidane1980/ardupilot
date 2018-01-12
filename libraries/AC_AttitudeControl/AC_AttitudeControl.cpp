@@ -124,7 +124,7 @@ const AP_Param::GroupInfo AC_AttitudeControl::var_info[] = {
     // @DisplayName: Sweep Input Axis
     // @Description: Automated Sweep Input Axis
     // @Range: 0 3
-    // @Values: 0:Disabled, 1:Pitch, 2:Roll, 3:Yaw
+    // @Values: 0:Disabled, 1:Pitch, 2:Roll, 3:Yaw, 4:Throttle/Collective
     // @User: Advanced
     AP_GROUPINFO("SWEEP_AXIS", 21, AC_AttitudeControl, _sweep_axis, 0),
 
