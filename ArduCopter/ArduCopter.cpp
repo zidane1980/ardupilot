@@ -389,16 +389,10 @@ void Copter::fourhundred_hz_logging()
 // should be run at 10hz
 void Copter::ten_hz_logging_loop()
 {
-    // log attitude data if we're not already logging at the higher rate
-    if (should_log(MASK_LOG_ATTITUDE_MED) && !should_log(MASK_LOG_ATTITUDE_FAST)) {
-        Log_Write_Attitude();
-        Log_Write_EKF_POS();
-    }
     if (should_log(MASK_LOG_MOTBATT)) {
         Log_Write_MotBatt();
     }
     if (should_log(MASK_LOG_RCIN)) {
-        DataFlash.Log_Write_RCIN();
         if (rssi.enabled()) {
             DataFlash.Log_Write_RSSI(rssi);
         }
@@ -431,10 +425,17 @@ void Copter::twentyfive_hz_logging()
 #endif
 
 #if HIL_MODE == HIL_MODE_DISABLED
+    // log attitude data if we're not already logging at the higher rate
+    if (should_log(MASK_LOG_ATTITUDE_MED) && !should_log(MASK_LOG_ATTITUDE_FAST)) {
+        Log_Write_Attitude();
+        Log_Write_EKF_POS();
+    }
     if (should_log(MASK_LOG_ATTITUDE_FAST)) {
         Log_Write_EKF_POS();
     }
-
+    if (should_log(MASK_LOG_RCIN)) {
+        DataFlash.Log_Write_RCIN();
+    }
     // log IMU data if we're not already logging at the higher rate
     if (should_log(MASK_LOG_IMU) && !should_log(MASK_LOG_IMU_RAW)) {
         DataFlash.Log_Write_IMU(ins);
