@@ -1,5 +1,9 @@
 ArduPilot Copter Release Notes:
 ------------------------------------------------------------------
+Copter 3.5.4 bnsgeyer V1.1 15-Jan-2018 / 3.5.4 bnsgeyer V1.1 15-Jan-2018
+Changes from 3.5.4
+1) removed EKF message from 50hz logging and put in 10hz logging
+------------------------------------------------------------------
 Copter 3.5.4 bnsgeyer V1.0 15-Jan-2018 / 3.5.4 24-Nov-2017
 Changes from 3.5.4
 1) Incorporated automated frequency sweep capability
