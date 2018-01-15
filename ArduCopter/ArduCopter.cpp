@@ -397,6 +397,9 @@ void Copter::ten_hz_logging_loop()
             DataFlash.Log_Write_RSSI(rssi);
         }
     }
+    if (should_log(MASK_LOG_ATTITUDE_MED) || should_log(MASK_LOG_ATTITUDE_FAST)) {
+        Log_Write_EKF_POS();
+    }
     if (should_log(MASK_LOG_RCOUT)) {
         DataFlash.Log_Write_RCOUT();
     }
@@ -428,10 +431,6 @@ void Copter::fifty_hz_logging()
     // log attitude data if we're not already logging at the higher rate
     if (should_log(MASK_LOG_ATTITUDE_MED) && !should_log(MASK_LOG_ATTITUDE_FAST)) {
         Log_Write_Attitude();
-        Log_Write_EKF_POS();
-    }
-    if (should_log(MASK_LOG_ATTITUDE_FAST)) {
-        Log_Write_EKF_POS();
     }
     if (should_log(MASK_LOG_RCIN)) {
         DataFlash.Log_Write_RCIN();
