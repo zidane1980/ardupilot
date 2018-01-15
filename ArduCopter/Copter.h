@@ -647,7 +647,7 @@ private:
     void update_batt_compass(void);
     void fourhundred_hz_logging();
     void ten_hz_logging_loop();
-    void twentyfive_hz_logging();
+    void fifty_hz_logging();
     void three_hz_loop();
     void one_hz_loop();
     void update_GPS(void);

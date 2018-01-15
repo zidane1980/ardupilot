@@ -123,7 +123,7 @@ const AP_Scheduler::Task Copter::scheduler_tasks[] = {
     SCHED_TASK(update_mount,          50,     75),
     SCHED_TASK(update_trigger,        50,     75),
     SCHED_TASK(ten_hz_logging_loop,   10,    350),
-    SCHED_TASK(twentyfive_hz_logging, 25,    110),
+    SCHED_TASK(fifty_hz_logging,      50,    110),
     SCHED_TASK(dataflash_periodic,    400,    300),
     SCHED_TASK(perf_update,           0.1,    75),
     SCHED_TASK(read_receiver_rssi,    10,     75),
@@ -416,8 +416,8 @@ void Copter::ten_hz_logging_loop()
 #endif
 }
 
-// twentyfive_hz_logging - should be run at 25hz
-void Copter::twentyfive_hz_logging()
+// fifty_hz_logging - should be run at 25hz
+void Copter::fifty_hz_logging()
 {
 #if HIL_MODE != HIL_MODE_DISABLED
     // HIL for a copter needs very fast update of the servo values
