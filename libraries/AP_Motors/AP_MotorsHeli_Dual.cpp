@@ -279,7 +279,7 @@ void AP_MotorsHeli_Dual::calculate_armed_scalars()
     _rotor.set_runup_time(_rsc_runup_time);
     _rotor.set_critical_speed(_rsc_critical/1000.0f);
     _rotor.set_idle_output(_rsc_idle_output/1000.0f);
-    _rotor.set_power_output_range(_rsc_power_low/1000.0f, _rsc_power_high/1000.0f, _rsc_power_high/1000.0f, 0);
+    _rotor.set_throttle_curve(_rsc_thrcrv_0/1000.0f, _rsc_thrcrv_25/1000.0f, _rsc_thrcrv_50/1000.0f, _rsc_thrcrv_75/1000.0f, _rsc_thrcrv_100/1000.0f, (uint16_t)_rsc_slewrate.get());
 }
 
 // calculate_scalars
@@ -504,7 +504,7 @@ void AP_MotorsHeli_Dual::move_actuators(float roll_out, float pitch_out, float c
 
     // feed power estimate into main rotor controller
     // ToDo: add main rotor cyclic power?
-    _rotor.set_motor_load(fabsf(collective_out - _collective_mid_pct));
+    _rotor.set_collective(collective_out);
 
     // swashplate servos
     float servo1_out = (_rollFactor[CH_1] * roll_out + _pitchFactor[CH_1] * pitch_out + _yawFactor[CH_1] * yaw_out)*0.45f + _collectiveFactor[CH_1] * collective_out_scaled;

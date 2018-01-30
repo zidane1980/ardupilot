@@ -69,11 +69,11 @@ public:
     // set_runup_time
     void        set_runup_time(int8_t runup_time) { _runup_time = runup_time; }
 
-    // set_power_output_range
-    void        set_power_output_range(float power_low, float power_high, float power_negc, uint16_t slewrate);
+    // set_throttle_curve
+    void        set_throttle_curve(float thrcrv_0, float thrcrv_25, float thrcrv_50, float thrcrv_75, float thrcrv_100, uint16_t slewrate);
 
-    // set_motor_load. +ve numbers for +ve collective. -ve numbers for negative collective
-    void        set_motor_load(float load) { _load_feedforward = load; }
+    // set_collective. collective for throttle curve calculation
+    void        set_collective(float collective) { _collective_in = collective; }
 
     // output - update value to send to ESC/Servo
     void        output(RotorControlState state);
@@ -96,11 +96,14 @@ private:
     int8_t          _ramp_time = 0;             // time in seconds for the output to the main rotor's ESC to reach full speed
     int8_t          _runup_time = 0;            // time in seconds for the main rotor to reach full speed.  Must be longer than _rsc_ramp_time
     bool            _runup_complete = false;    // flag for determining if runup is complete
-    float           _power_output_low = 0.0f;   // setpoint for power output at minimum rotor power
-    float           _power_output_high = 0.0f;  // setpoint for power output at maximum rotor power
-    float           _power_output_negc = 0.0f;  // setpoint for power output at full negative collective
+    float           _rsc_thrcrv_0 = 0.0f;       // throttle value sent to throttle servo at 0 percent collective
+    float           _rsc_thrcrv_25 = 0.0f;      // throttle value sent to throttle servo at 25 percent collective
+    float           _rsc_thrcrv_50 = 0.0f;      // throttle value sent to throttle servo at 50 percent collective
+    float           _rsc_thrcrv_75 = 0.0f;      // throttle value sent to throttle servo at 75 percent collective
+    float           _rsc_thrcrv_100 = 0.0f;     // throttle value sent to throttle servo at 100 percent collective  
     uint16_t        _power_slewrate = 0;        // slewrate for throttle (percentage per second)
-    float           _load_feedforward = 0.0f;   // estimate of motor load, range 0-1.0f
+    float           _collective_in = 0.0f;      // collective in for throttle curve calculation, range 0-1.0f
+//    VectorNd        _thrcrv(5);                 // vector for throttle curve
 
     // update_rotor_ramp - slews rotor output scalar between 0 and 1, outputs float scalar to _rotor_ramp_output
     void            update_rotor_ramp(float rotor_ramp_input, float dt);
@@ -110,4 +113,7 @@ private:
 
     // write_rsc - outputs pwm onto output rsc channel. servo_out parameter is of the range 0 ~ 1
     void            write_rsc(float servo_out);
+
+    // calculate_desired_throttle - uses throttle curve and collective input to determine throttle setting
+    float           calculate_desired_throttle(float collective_in, float thrcrv_0, float thrcrv_25, float thrcrv_50, float thrcrv_75, float thrcrv_100);
 };

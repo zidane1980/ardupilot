@@ -31,8 +31,11 @@
 
 // RSC output defaults
 #define AP_MOTORS_HELI_RSC_IDLE_DEFAULT         0
-#define AP_MOTORS_HELI_RSC_POWER_LOW_DEFAULT    200
-#define AP_MOTORS_HELI_RSC_POWER_HIGH_DEFAULT   700
+#define AP_MOTORS_HELI_RSC_THRCRV_0_DEFAULT     200
+#define AP_MOTORS_HELI_RSC_THRCRV_25_DEFAULT    280
+#define AP_MOTORS_HELI_RSC_THRCRV_50_DEFAULT    310
+#define AP_MOTORS_HELI_RSC_THRCRV_75_DEFAULT    500
+#define AP_MOTORS_HELI_RSC_THRCRV_100_DEFAULT   1000
 
 // default main rotor ramp up time in seconds
 #define AP_MOTORS_HELI_RSC_RAMP_TIME            1       // 1 second to ramp output to main rotor ESC to full power (most people use exterrnal govenors so we can ramp up quickly)
@@ -200,9 +203,11 @@ protected:
     AP_Int16        _land_collective_min;       // Minimum collective when landed or landing
     AP_Int16        _rsc_critical;              // Rotor speed below which flight is not possible
     AP_Int16        _rsc_idle_output;           // Rotor control output while at idle
-    AP_Int16        _rsc_power_low;             // throttle value sent to throttle servo at zero collective pitch
-    AP_Int16        _rsc_power_high;            // throttle value sent to throttle servo at maximum collective pitch
-    AP_Int16        _rsc_power_negc;            // throttle value sent to throttle servo at full negative collective pitch
+    AP_Int16        _rsc_thrcrv_0;              // throttle value sent to throttle servo at 0 percent collective
+    AP_Int16        _rsc_thrcrv_25;             // throttle value sent to throttle servo at 25 percent collective
+    AP_Int16        _rsc_thrcrv_50;             // throttle value sent to throttle servo at 50 percent collective
+    AP_Int16        _rsc_thrcrv_75;             // throttle value sent to throttle servo at 75 percent collective
+    AP_Int16        _rsc_thrcrv_100;            // throttle value sent to throttle servo at 100 percent collective
     AP_Int16        _rsc_slewrate;              // throttle slew rate (percentage per second)
     AP_Int8         _servo_test;                // sets number of cycles to test servo movement on bootup
 

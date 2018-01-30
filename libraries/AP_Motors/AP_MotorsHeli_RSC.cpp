@@ -28,11 +28,13 @@ void AP_MotorsHeli_RSC::init_servo()
 }
 
 // set_power_output_range
-void AP_MotorsHeli_RSC::set_power_output_range(float power_low, float power_high, float power_negc, uint16_t slewrate)
+void AP_MotorsHeli_RSC::set_throttle_curve(float thrcrv_0, float thrcrv_25, float thrcrv_50, float thrcrv_75, float thrcrv_100, uint16_t slewrate)
 {
-    _power_output_low = power_low;
-    _power_output_high = power_high;
-    _power_output_negc = power_negc;
+    _rsc_thrcrv_0 = thrcrv_0;
+    _rsc_thrcrv_25 = thrcrv_25;
+    _rsc_thrcrv_50 = thrcrv_50;
+    _rsc_thrcrv_75 = thrcrv_75;
+    _rsc_thrcrv_100 = thrcrv_100;
     _power_slewrate = slewrate;
 }
 
@@ -76,15 +78,10 @@ void AP_MotorsHeli_RSC::output(RotorControlState state)
                 // set control rotor speed to ramp slewed value between idle and desired speed
                 _control_output = _idle_output + (_rotor_ramp_output * (_desired_speed - _idle_output));
             } else if (_control_mode == ROTOR_CONTROL_MODE_OPEN_LOOP_POWER_OUTPUT) {
-                // throttle output depending on estimated power demand. Output is ramped up from idle speed during rotor runup. A negative load
-                // is for the left side of the V-curve (-ve collective) A positive load is for the right side (+ve collective)
-                if (_load_feedforward >= 0) {
-                    float range = _power_output_high - _power_output_low;
-                    _control_output = _idle_output + (_rotor_ramp_output * ((_power_output_low - _idle_output) + (range * _load_feedforward)));
-                } else {
-                    float range = _power_output_negc - _power_output_low;
-                    _control_output = _idle_output + (_rotor_ramp_output * ((_power_output_low - _idle_output) - (range * _load_feedforward)));
-                }
+                // throttle output from throttle curve based on collective position
+                    
+                    float desired_throttle = calculate_desired_throttle(_collective_in, _rsc_thrcrv_0, _rsc_thrcrv_25, _rsc_thrcrv_50, _rsc_thrcrv_75, _rsc_thrcrv_100);
+                    _control_output = _idle_output + (_rotor_ramp_output * (desired_throttle - _idle_output));
             }
             break;
     }
@@ -190,3 +187,43 @@ void AP_MotorsHeli_RSC::write_rsc(float servo_out)
         SRV_Channels::set_output_scaled(_aux_fn, (uint16_t) (servo_out * 1000));
     }
 }
+
+    // calculate_desired_throttle - uses throttle curve and collective input to determine throttle setting
+float AP_MotorsHeli_RSC::calculate_desired_throttle(float collective_in, float thrcrv_0, float thrcrv_25, float thrcrv_50, float thrcrv_75, float thrcrv_100)
+{
+    std::vector<std::vector<double>> thrcrv_poly(5, std::vector<double>(4));
+    std::vector<double> thrcrv(5);
+    double throttle = 0.0f;
+    double inpt, a, b;
+    thrcrv[0] = thrcrv_0;
+    thrcrv[1] = thrcrv_25;
+    thrcrv[2] = thrcrv_50;
+    thrcrv[3] = thrcrv_75;
+    thrcrv[4] = thrcrv_100;
+
+    thrcrv_poly = splinterp(thrcrv);
+
+    inpt = (double)collective_in * 4.0f + 1.0f;
+    if (collective_in < 0.25){
+        a = inpt - 1.0f;
+        b = 1.0f - inpt + 1.0f;
+        throttle = thrcrv_poly[0][0] * a + thrcrv_poly[0][1] * b + thrcrv_poly[0][2] * (pow(a,3.0f) - a) / 6.0f + thrcrv_poly[0][3] * (pow(b,3.0f) - b) / 6.0f;
+    } else if (collective_in < 0.5){
+        a = inpt - 2.0f;
+        b = 2.0f - inpt + 1.0f;
+        throttle = thrcrv_poly[1][0] * a + thrcrv_poly[1][1] * b + thrcrv_poly[1][2] * (pow(a,3.0f) - a) / 6.0f + thrcrv_poly[1][3] * (pow(b,3.0f) - b) / 6.0f;
+    } else if (collective_in < 0.75){
+        a = inpt - 3.0f;
+        b = 3.0f - inpt + 1.0f;
+        throttle = thrcrv_poly[2][0] * a + thrcrv_poly[2][1] * b + thrcrv_poly[2][2] * (pow(a,3.0f) - a) / 6.0f + thrcrv_poly[2][3] * (pow(b,3.0f) - b) / 6.0f;
+    } else{
+        a = inpt - 4.0f;
+        b = 4.0f - inpt + 1.0f;
+        throttle = thrcrv_poly[3][0] * a + thrcrv_poly[3][1] * b + thrcrv_poly[3][2] * (pow(a,3.0f) - a) / 6.0f + thrcrv_poly[3][3] * (pow(b,3.0f) - b) / 6.0f;
+    }
+    
+    throttle = constrain_float(throttle, 0.0f, 1.0f);
+    return throttle;
+
+}
+
