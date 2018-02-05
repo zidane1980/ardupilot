@@ -35,6 +35,7 @@ bool Copter::set_mode(control_mode_t mode, mode_reason_t reason)
 
     switch (mode) {
         case ACRO:
+// required because heli has a separate control routine for acro flight mode
             #if FRAME_CONFIG == HELI_FRAME
                 success = heli_acro_init(ignore_checks);
             #else
@@ -43,6 +44,7 @@ bool Copter::set_mode(control_mode_t mode, mode_reason_t reason)
             break;
 
         case STABILIZE:
+// required because heli has a separate control routine for stabilize flight mode
             #if FRAME_CONFIG == HELI_FRAME
                 success = heli_stabilize_init(ignore_checks);
             #else
@@ -176,6 +178,7 @@ void Copter::update_flight_mode()
 
     switch (control_mode) {
         case ACRO:
+// required because heli has a separate control routine for acro flight mode
             #if FRAME_CONFIG == HELI_FRAME
                 heli_acro_run();
             #else
@@ -184,6 +187,7 @@ void Copter::update_flight_mode()
             break;
 
         case STABILIZE:
+// required because heli has a separate control routine for stabilize flight mode
             #if FRAME_CONFIG == HELI_FRAME
                 heli_stabilize_run();
             #else

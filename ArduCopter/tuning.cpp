@@ -110,6 +110,7 @@ void Copter::tuning() {
         g.acro_yaw_p = tuning_value;
         break;
 
+    // Enables tuning of Trad Heli specific parameters
 #if FRAME_CONFIG == HELI_FRAME
     case TUNING_HELI_EXTERNAL_GYRO:
         motors->ext_gyro_gain((float)control_in / 1000.0f);
@@ -203,6 +204,7 @@ void Copter::tuning() {
         attitude_control->get_rate_roll_pid().kD(tuning_value);
         break;
 
+    // Prevents Trad Heli from tuning parameters that are specifically multicopter parameters
 #if FRAME_CONFIG != HELI_FRAME
     case TUNING_RATE_MOT_YAW_HEADROOM:
         motors->set_yaw_headroom(tuning_value*1000);

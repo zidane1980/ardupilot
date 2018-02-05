@@ -106,6 +106,11 @@ const AP_Scheduler::Task Copter::scheduler_tasks[] = {
 #if PRECISION_LANDING == ENABLED
     SCHED_TASK(update_precland,      400,     50),
 #endif
+/*determines whether heli is moving and sets the dynamic flight flag.  The 
+dynamic flight flag when true turns off the leaky integrator to allow it to 
+achieve max value.  When the dynamic flag is false it limits the collective 
+from going below the H_LAND_COL_MIN parameter.
+*/
 #if FRAME_CONFIG == HELI_FRAME
     SCHED_TASK(check_dynamic_flight,  50,     75),
 #endif
@@ -272,6 +277,9 @@ void Copter::fast_loop()
     read_AHRS();
 
 #if FRAME_CONFIG == HELI_FRAME
+    /*Sets the Leaky I flag based on whether aircraft is in dynamic flight. 
+    Also triggers hover roll trim which leans the aircraft to keep the aircraft
+    from being pushed laterally due to the tailrotor thrust */
     update_heli_control_dynamics();
 #endif //HELI_FRAME
 
@@ -323,10 +331,13 @@ void Copter::throttle_loop()
     update_auto_armed();
 
 #if FRAME_CONFIG == HELI_FRAME
-    // update rotor speed
+    /* update rotor speed. Primarily accomplishes passthrough of channel 8 for RSC mode 1. 
+    This also requires setting the motor interlock flag based on channel 8 pwm */
     heli_update_rotor_speed_targets();
 
-    // update trad heli swash plate movement
+    /* update trad heli swash plate movement.  In modes where the autopilot is controlling
+    the vertical axis, a flag is set in motors library to keep autopilot from lowering the 
+    collective below the H_COL_LAND_MIN value. */
     heli_update_landing_swash();
 #endif
 
@@ -418,6 +429,7 @@ void Copter::ten_hz_logging_loop()
         Log_Write_Beacon();
     }
 #if FRAME_CONFIG == HELI_FRAME
+    // Logs heli specific data
     Log_Write_Heli();
 #endif
 }
@@ -494,6 +506,8 @@ void Copter::one_hz_loop()
         // check the user hasn't updated the frame class or type
         motors->set_frame_class_and_type((AP_Motors::motor_frame_class)g2.frame_class.get(), (AP_Motors::motor_frame_type)g.frame_type.get());
 
+/*Heli's esc throttle settings are done through the rotor speed controller (RSC) object for each motor. Therefore
+heli's are excluded from this line of code */
 #if FRAME_CONFIG != HELI_FRAME
         // set all throttle channel settings
         motors->set_throttle_range(channel_throttle->get_radio_min(), channel_throttle->get_radio_max());

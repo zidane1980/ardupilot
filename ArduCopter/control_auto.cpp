@@ -179,7 +179,7 @@ void Copter::auto_takeoff_run()
     if (motors->rotor_runup_complete()) {
         set_land_complete(false);
     } else {
-        // initialise wpnav targets
+        // initialise wpnav targets.  Not sure why this is done for heli's and not mult's too.
         wp_nav->shift_wp_origin_to_current_pos();
     }
 #else

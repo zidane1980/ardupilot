@@ -172,7 +172,9 @@ void Copter::init_ardupilot()
     update_using_interlock();
 
 #if FRAME_CONFIG == HELI_FRAME
-    // trad heli specific initialisation
+    // trad heli specific initialisation.
+    // Input manager is initialized which pre-loads stab col values as mode is initialized 
+    // as Stabilize, but stabilize_init() function is not run on start-up.
     heli_init();
 #endif
     
@@ -616,6 +618,7 @@ void Copter::allocate_motors(void)
             motors_var_info = AP_MotorsTailsitter::var_info;
             break;
 #else // FRAME_CONFIG == HELI_FRAME
+      // motors library set up for Heli Frames
         case AP_Motors::MOTOR_FRAME_HELI_DUAL:
             motors = new AP_MotorsHeli_Dual(MAIN_LOOP_RATE);
             motors_var_info = AP_MotorsHeli_Dual::var_info;
@@ -645,7 +648,7 @@ void Copter::allocate_motors(void)
 #if FRAME_CONFIG != HELI_FRAME
     attitude_control = new AC_AttitudeControl_Multi(*ahrs_view, aparm, *motors, MAIN_LOOP_SECONDS);
     ac_var_info = AC_AttitudeControl_Multi::var_info;
-#else
+#else  // Attitude control library set up for Heli Frame
     attitude_control = new AC_AttitudeControl_Heli(*ahrs_view, aparm, *motors, MAIN_LOOP_SECONDS);
     ac_var_info = AC_AttitudeControl_Heli::var_info;
 #endif

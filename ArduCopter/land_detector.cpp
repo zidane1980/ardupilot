@@ -133,6 +133,7 @@ void Copter::set_land_complete_maybe(bool b)
 //  has no effect when throttle is above hover throttle
 void Copter::update_throttle_thr_mix()
 {
+// Heli does not utilize this feature
 #if FRAME_CONFIG != HELI_FRAME
     // if disarmed or landed prioritise throttle
     if(!motors->armed() || ap.land_complete) {

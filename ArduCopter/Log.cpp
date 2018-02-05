@@ -408,6 +408,7 @@ struct PACKED log_MotBatt {
 // Write an rate packet
 void Copter::Log_Write_MotBatt()
 {
+// Heli does not use this data packet
 #if FRAME_CONFIG != HELI_FRAME
     struct log_MotBatt pkt_mot = {
         LOG_PACKET_HEADER_INIT(LOG_MOTBATT_MSG),
@@ -984,7 +985,7 @@ void Copter::Log_Write_Throw(ThrowModeStage stage, float velocity, float velocit
 void Copter::Log_Write_Proximity() {}
 void Copter::Log_Write_Beacon() {}
 void Copter::Log_Write_Vehicle_Startup_Messages() {}
-
+// support to log Heli specific data
 #if FRAME_CONFIG == HELI_FRAME
 void Copter::Log_Write_Heli() {}
 #endif

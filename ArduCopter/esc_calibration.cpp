@@ -18,6 +18,7 @@ enum ESCCalibrationModes {
 // check if we should enter esc calibration mode
 void Copter::esc_calibration_startup_check()
 {
+//Heli frame excluded from ESC calibration
 #if FRAME_CONFIG != HELI_FRAME
     // delay up to 2 second for first radio input
     uint8_t i = 0;
@@ -82,6 +83,7 @@ void Copter::esc_calibration_startup_check()
 // esc_calibration_passthrough - pass through pilot throttle to escs
 void Copter::esc_calibration_passthrough()
 {
+// Heli frame excluded from ESC calibration
 #if FRAME_CONFIG != HELI_FRAME
     // clear esc flag for next time
     g.esc_calibrate.set_and_save(ESCCAL_NONE);
@@ -128,6 +130,7 @@ void Copter::esc_calibration_passthrough()
 // esc_calibration_auto - calibrate the ESCs automatically using a timer and no pilot input
 void Copter::esc_calibration_auto()
 {
+// Heli frame excluded from ESC calibration
 #if FRAME_CONFIG != HELI_FRAME
     bool printed_msg = false;
 

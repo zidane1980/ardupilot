@@ -665,6 +665,7 @@ const AP_Param::Info Copter::var_info[] = {
     // @Path: ../libraries/AP_LandingGear/AP_LandingGear.cpp
     GOBJECT(landinggear,    "LGR_", AP_LandingGear),
 
+    // Heli frames use the input manager to determine pilot desired collective inputs
 #if FRAME_CONFIG == HELI_FRAME
     // @Group: IM_
     // @Path: ../libraries/AC_InputManager/AC_InputManager_Heli.cpp
@@ -690,6 +691,7 @@ const AP_Param::Info Copter::var_info[] = {
     // @Group: ATC_
     // @Path: ../libraries/AC_AttitudeControl/AC_AttitudeControl.cpp,../libraries/AC_AttitudeControl/AC_AttitudeControl_Multi.cpp,../libraries/AC_AttitudeControl/AC_AttitudeControl_Heli.cpp
 #if FRAME_CONFIG == HELI_FRAME
+    // Heli frame has parameters unique to the attitude controller as well as parameters for a heli specific PID library
     GOBJECTPTR(attitude_control, "ATC_", AC_AttitudeControl_Heli),
 #else
     GOBJECTPTR(attitude_control, "ATC_", AC_AttitudeControl_Multi),
@@ -781,6 +783,7 @@ const AP_Param::Info Copter::var_info[] = {
 #if FRAME_CONFIG == HELI_FRAME
     // @Group: H_
     // @Path: ../libraries/AP_Motors/AP_MotorsHeli_Single.cpp,../libraries/AP_Motors/AP_MotorsHeli_Dual.cpp,../libraries/AP_Motors/AP_MotorsHeli.cpp
+    // Defines the motor parameters unique to heli frame types
     GOBJECTVARPTR(motors, "H_",        &copter.motors_var_info),
 #else
     // @Group: MOT_
@@ -1098,6 +1101,7 @@ void Copter::convert_pid_parameters(void)
         { Parameters::k_param_pid_rate_yaw, 0, AP_PARAM_FLOAT, "ATC_RAT_YAW_P" },
         { Parameters::k_param_pid_rate_yaw, 1, AP_PARAM_FLOAT, "ATC_RAT_YAW_I" },
         { Parameters::k_param_pid_rate_yaw, 2, AP_PARAM_FLOAT, "ATC_RAT_YAW_D" },
+    //conversion of heli specific rate feed forward (FF) parameters from Copter-3.3 to Copter-3.4
 #if FRAME_CONFIG == HELI_FRAME
         { Parameters::k_param_pid_rate_roll,  4, AP_PARAM_FLOAT, "ATC_RAT_RLL_VFF" },
         { Parameters::k_param_pid_rate_pitch, 4, AP_PARAM_FLOAT, "ATC_RAT_PIT_VFF" },
@@ -1108,6 +1112,7 @@ void Copter::convert_pid_parameters(void)
         { Parameters::k_param_pid_rate_roll,  5, AP_PARAM_FLOAT, "ATC_RAT_RLL_IMAX" },
         { Parameters::k_param_pid_rate_pitch, 5, AP_PARAM_FLOAT, "ATC_RAT_PIT_IMAX" },
         { Parameters::k_param_pid_rate_yaw,   5, AP_PARAM_FLOAT, "ATC_RAT_YAW_IMAX" },
+    //conversion of heli specific integrator leak minimum (ILMI) parameters from Copter-3.3 to Copter-3.4
 #if FRAME_CONFIG == HELI_FRAME
         { Parameters::k_param_pid_rate_roll,  7, AP_PARAM_FLOAT, "ATC_RAT_RLL_ILMI" },
         { Parameters::k_param_pid_rate_pitch, 7, AP_PARAM_FLOAT, "ATC_RAT_PIT_ILMI" },

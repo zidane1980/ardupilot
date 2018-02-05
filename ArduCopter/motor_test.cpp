@@ -36,6 +36,8 @@ void Copter::motor_test_output()
 
             case MOTOR_TEST_THROTTLE_PERCENT:
                 // sanity check motor_test_throttle value
+                // HELI frame output test function includes servos and main rotor motor and as such throttle percent doesn't make sense.
+                // This function could damage a heli if request was too large plus it doesn't consider the heli servo limits.
 #if FRAME_CONFIG != HELI_FRAME
                 if (motor_test_throttle_value <= 100) {
                     int16_t pwm_min = motors->get_pwm_output_min();

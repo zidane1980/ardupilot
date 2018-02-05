@@ -8,9 +8,11 @@ void Copter::default_dead_zones()
 {
     channel_roll->set_default_dead_zone(20);
     channel_pitch->set_default_dead_zone(20);
+    // Smaller dead zones are set for heli frames in collective (throttle) and yaw channels
 #if FRAME_CONFIG == HELI_FRAME
     channel_throttle->set_default_dead_zone(10);
     channel_yaw->set_default_dead_zone(15);
+    // This default dead zone assignment appears to be overwritten by the statement after this #if statement
     RC_Channels::rc_channel(CH_6)->set_default_dead_zone(10);
 #else
     channel_throttle->set_default_dead_zone(30);
@@ -51,6 +53,7 @@ void Copter::init_rc_out()
     motors->set_update_rate(g.rc_speed);
     motors->set_loop_rate(scheduler.get_loop_rate_hz());
     motors->init((AP_Motors::motor_frame_class)g2.frame_class.get(), (AP_Motors::motor_frame_type)g.frame_type.get());
+    // Does the #else statement apply to heli frames? 
 #if FRAME_CONFIG != HELI_FRAME
     motors->set_throttle_range(channel_throttle->get_radio_min(), channel_throttle->get_radio_max());
 #else
@@ -62,6 +65,7 @@ void Copter::init_rc_out()
     // refresh auxiliary channel to function map
     SRV_Channels::update_aux_servo_function();
 
+    // Why is this not applicable to Heli's?  
 #if FRAME_CONFIG != HELI_FRAME
     /*
       setup a default safety ignore mask, so that servo gimbals can be active while safety is on

@@ -105,6 +105,10 @@ float Copter::get_look_ahead_yaw()
 //  called at 100hz
 void Copter::update_throttle_hover()
 {
+/* this section of code is excluded for trad heli because throttle 
+is used to maintain constant rotor RPM.  The hover collective is set 
+up by the user and there is no feature to automatically determine the 
+hover collective */
 #if FRAME_CONFIG != HELI_FRAME
     // if not armed or landed exit
     if (!motors->armed() || ap.land_complete) {

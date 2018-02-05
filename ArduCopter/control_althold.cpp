@@ -79,6 +79,8 @@ void Copter::althold_run()
 #if FRAME_CONFIG == HELI_FRAME    
         // force descent rate and call position controller
         pos_control->set_alt_target_from_climb_rate(-abs(g.land_speed), G_Dt, false);
+        // This flag initializes the heading target and zeros I terms when motor interlock is enabled. In this case it sets the flag true
+        // since motors are stopped in preparation for when aircraft is armed and motor interlock is enabled.
         heli_flags.init_targets_on_arming=true;
 #else
         pos_control->relax_alt_hold_controllers(0.0f);   // forces throttle output to go to zero
@@ -88,6 +90,8 @@ void Copter::althold_run()
 
     case AltHold_Takeoff:
 #if FRAME_CONFIG == HELI_FRAME    
+        // This flag initializes the heading target and zeros I terms when motor interlock is enabled. Statement is setting the flag false 
+        // if it is true so as to not continually resetting heading target and I terms.
         if (heli_flags.init_targets_on_arming) {
             heli_flags.init_targets_on_arming=false;
         }
@@ -128,6 +132,8 @@ void Copter::althold_run()
         }
 
 #if FRAME_CONFIG == HELI_FRAME    
+        // This flag initializes the heading target and zeros I terms when motor interlock is enabled.  This is the statement that peforms
+        // these tasks when the flag is true.
         if (heli_flags.init_targets_on_arming) {
             attitude_control->reset_rate_controller_I_terms();
             attitude_control->set_yaw_target_to_current_heading();
